@@ -6,6 +6,7 @@ from datetime import datetime
 import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
 from typing import List
+import io
 
 from models.database_models import SessionLocal, UVA, DolarMEP, DolarMayorista
 from models.schemas import CotizacionResponse
@@ -31,18 +32,46 @@ def get_db():
     finally:
         db.close()
 
+def validate_date_format(date_str: str) -> bool:
+    try:
+        datetime.strptime(date_str, '%d-%m-%y')
+        return True
+    except ValueError:
+        return False
+
+def convert_date_format(date_str: str) -> str:
+    date_obj = datetime.strptime(date_str, '%d-%m-%y')
+    return date_obj.strftime('%Y-%m-%d')
+
 @app.post("/import/{table_type}")
 async def import_data(table_type: str, file: UploadFile = File(...), db: Session = Depends(get_db)):
     if table_type not in ["uva", "dolar_mep", "dolar_mayorista"]:
         raise HTTPException(status_code=400, detail="Tipo de tabla inválido")
     
     try:
-        # Leer el archivo CSV
-        df = pd.read_csv(file.file)
+        if not file.filename.endswith('.csv'):
+            raise HTTPException(status_code=400, detail="El archivo debe ser un CSV")
         
-        # Verificar columnas requeridas
-        if not all(col in df.columns for col in ['fecha', 'valor']):
-            raise HTTPException(status_code=400, detail="El CSV debe contener las columnas 'fecha' y 'valor'")
+        content = await file.read()
+        df = pd.read_csv(io.StringIO(content.decode('utf-8')))
+        
+        required_columns = ['fecha', 'valor']
+        if not all(col in df.columns for col in required_columns):
+            raise HTTPException(status_code=400, detail="El archivo debe contener las columnas 'fecha' y 'valor'")
+        
+        # Validar formato de fechas
+        invalid_dates = df[~df['fecha'].apply(validate_date_format)]
+        if not invalid_dates.empty:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Formato de fecha inválido en las siguientes filas: {invalid_dates.index.tolist()}"
+            )
+        
+        # Convertir formato de fechas
+        df['fecha'] = df['fecha'].apply(convert_date_format)
+        
+        # Eliminar filas con valores NaN
+        df = df.dropna()
         
         # Mapeo de tipos de tabla a modelos
         model_map = {
@@ -55,16 +84,27 @@ async def import_data(table_type: str, file: UploadFile = File(...), db: Session
         
         # Procesar cada fila
         for _, row in df.iterrows():
-            fecha = datetime.strptime(row['fecha'], '%d-%m-%y').date()
-            valor = float(row['valor'])
-            
-            # Verificar si ya existe un registro para esa fecha
-            existing = db.query(model).filter(model.fecha == fecha).first()
-            if existing:
-                existing.valor = valor
-            else:
-                new_record = model(fecha=fecha, valor=valor)
-                db.add(new_record)
+            try:
+                print(row)
+                # Verificar que la fecha sea un string
+                if not isinstance(row['fecha'], str):
+                    continue
+                    
+                fecha = datetime.strptime(row['fecha'], '%Y-%m-%d').date()
+                valor = float(row['valor'])
+                
+                # Verificar si ya existe un registro para esa fecha
+                existing = db.query(model).filter(model.fecha == fecha).first()
+                if existing:
+                    print("existe", existing.fecha)
+                    existing.valor = valor
+                else:
+                    new_record = model(fecha=fecha, valor=valor)
+                    print(new_record)
+                    db.add(new_record)
+            except (ValueError, TypeError):
+                # Ignorar filas con formato incorrecto
+                continue
         
         db.commit()
         return {"message": "Datos importados exitosamente"}
