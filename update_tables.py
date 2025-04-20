@@ -92,8 +92,8 @@ def main():
     
     try:
         # Actualizar cada tabla
-        update_table("dolar_mayorista.csv", DolarMayorista, "dolar_mayorista")
-        update_table("dolar_mep.csv", DolarMEP, "dolar_mep")
+        update_table("mayorista_lo_q_falta.csv", DolarMayorista, "dolar_mayorista")
+        update_table("mep.csv", DolarMEP, "dolar_mep")
         update_table("uva.csv", UVA, "uva")
         
         print("\nProceso de actualización completado exitosamente")
