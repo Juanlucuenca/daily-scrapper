@@ -10,8 +10,8 @@ def format_date(date: datetime) -> str:
     """Convierte un objeto datetime a formato DD-MM-YY."""
     return date.strftime("%d-%m-%y")
 
-def generate_future_dates(start_date: datetime, years: int = 10) -> List[datetime]:
-    """Genera fechas futuras desde una fecha inicial hasta 10 años adelante."""
+def generate_future_dates(start_date: datetime, years: int = 75) -> List[datetime]:
+    """Genera fechas futuras desde una fecha inicial hasta 75 años adelante."""
     end_date = start_date + timedelta(days=years*365)
     date_range = pd.date_range(start=start_date, end=end_date, freq='D')
     return [date.to_pydatetime() for date in date_range]
