@@ -190,7 +190,8 @@ def update_daily_quotes():
 
 # Configurar el scheduler para ejecutar la actualización diaria
 scheduler = BackgroundScheduler()
-scheduler.add_job(update_daily_quotes, 'cron', hour=16, timezone='America/Argentina/Buenos_Aires')
+print("Scheduler configurado")
+scheduler.add_job(update_daily_quotes, 'cron', hour=16, minute=2, timezone='America/Argentina/Buenos_Aires')
 scheduler.start()
 
 @app.on_event("shutdown")
