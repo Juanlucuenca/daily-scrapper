@@ -88,15 +88,26 @@ class FinancialScraper:
     @staticmethod
     def scrape_dolar_mayorista() -> Dict[str, float]:
         """
-        Scrapeando Dólar Mayorista desde investing.com
+        Scrapeando Dólar Mayorista desde investing.com usando ZenRows
         Returns: {'valor': float}
         """
         try:
             logger.info("Scraping Dólar Mayorista value...")
-            url = "https://es.investing.com/currencies/usd-ars"
-            page_content = FinancialScraper.fetch_webpage(url)
-            soup = BeautifulSoup(page_content, 'lxml')
 
+            # Configuración para ZenRows
+            url = 'https://es.investing.com/currencies/usd-ars'
+            apikey = 'a315e785bacdf6755373a6de90c957c860f44b82'
+            params = {
+                'url': url,
+                'apikey': apikey,
+            }
+
+            # Request a través de ZenRows
+            response = requests.get('https://api.zenrows.com/v1/', params=params, timeout=30)
+            response.raise_for_status()
+
+            # Parsear HTML
+            soup = BeautifulSoup(response.text, 'lxml')
             precio_dolar_mayorista = soup.find('div', {'data-test': 'instrument-price-last'}).getText()
             precio_formatted = FinancialScraper.parse_price(precio_dolar_mayorista)
 
