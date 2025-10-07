@@ -88,22 +88,20 @@ class FinancialScraper:
     @staticmethod
     def scrape_dolar_mayorista() -> Dict[str, float]:
         """
-        Scrapeando Dólar Mayorista desde investing.com usando ZenRows
+        Scrapeando Dólar Mayorista desde investing.com usando ScraperAPI
         Returns: {'valor': float}
         """
         try:
             logger.info("Scraping Dólar Mayorista value...")
 
-            # Configuración para ZenRows
-            url = 'https://es.investing.com/currencies/usd-ars'
-            apikey = 'a315e785bacdf6755373a6de90c957c860f44b82'
-            params = {
-                'url': url,
-                'apikey': apikey,
+            # Configuración para ScraperAPI
+            payload = {
+                'api_key': '0f7d8d0b3ba5e529319c2b0d531dc156',
+                'url': 'https://es.investing.com/currencies/usd-ars'
             }
 
-            # Request a través de ZenRows
-            response = requests.get('https://api.zenrows.com/v1/', params=params, timeout=30)
+            # Request a través de ScraperAPI
+            response = requests.get('https://api.scraperapi.com/', params=payload, timeout=60)
             response.raise_for_status()
 
             # Parsear HTML
