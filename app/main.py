@@ -12,7 +12,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-app.include_router(financial_data.router, prefix="/api", tags=["financial-data"])
+app.include_router(financial_data.router, tags=["financial-data"])
 
 @app.on_event("startup")
 async def startup_event():

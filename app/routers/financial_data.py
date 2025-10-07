@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 csv_handler = CSVHandler()
 
-@router.get("/uva", response_model=FinancialDataResponse)
+@router.get("/uva", response_model=List[FinancialRecord])
 async def get_uva_data():
     """
     Obtiene los datos históricos de UVA más 10 años de proyecciones mockeadas
@@ -23,15 +23,12 @@ async def get_uva_data():
             for row in data
         ]
 
-        return FinancialDataResponse(
-            data=records,
-            total_records=len(records)
-        )
+        return records
     except Exception as e:
         logger.error(f"Error getting UVA data: {e}")
         raise HTTPException(status_code=500, detail=f"Error retrieving UVA data: {str(e)}")
 
-@router.get("/dolar-mayorista", response_model=FinancialDataResponse)
+@router.get("/dolar-mayorista", response_model=List[FinancialRecord])
 async def get_dolar_mayorista_data():
     """
     Obtiene los datos históricos de Dólar Mayorista más 10 años de proyecciones mockeadas
@@ -44,15 +41,12 @@ async def get_dolar_mayorista_data():
             for row in data
         ]
 
-        return FinancialDataResponse(
-            data=records,
-            total_records=len(records)
-        )
+        return records
     except Exception as e:
         logger.error(f"Error getting Dólar Mayorista data: {e}")
         raise HTTPException(status_code=500, detail=f"Error retrieving Dólar Mayorista data: {str(e)}")
 
-@router.get("/dolar-mep", response_model=FinancialDataResponse)
+@router.get("/dolar-mep", response_model=List[FinancialRecord])
 async def get_dolar_mep_data():
     """
     Obtiene los datos históricos de Dólar MEP más 10 años de proyecciones mockeadas
@@ -65,10 +59,7 @@ async def get_dolar_mep_data():
             for row in data
         ]
 
-        return FinancialDataResponse(
-            data=records,
-            total_records=len(records)
-        )
+        return records
     except Exception as e:
         logger.error(f"Error getting Dólar MEP data: {e}")
         raise HTTPException(status_code=500, detail=f"Error retrieving Dólar MEP data: {str(e)}")
