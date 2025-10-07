@@ -19,3 +19,16 @@ class HealthCheckResponse(BaseModel):
     dolar_mayorista_value: float | None = None
     dolar_mep_value: float | None = None
     errors: List[str] = []
+
+class JobInfo(BaseModel):
+    id: str
+    name: str
+    next_run: str | None
+    trigger: str
+
+class SchedulerStatusResponse(BaseModel):
+    scheduler_running: bool
+    current_time_argentina: str
+    timezone: str
+    jobs: List[JobInfo]
+    total_jobs: int

@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException
-from app.models.schemas import FinancialDataResponse, FinancialRecord, HealthCheckResponse
+from app.models.schemas import FinancialDataResponse, FinancialRecord, HealthCheckResponse, SchedulerStatusResponse
 from app.utils.csv_handler import CSVHandler
 from app.services.scraper import FinancialScraper
+from app.services.scheduler import get_scheduler_status, update_financial_data
 from typing import List
 import logging
 
@@ -124,3 +125,31 @@ async def health_check():
         dolar_mep_value=dolar_mep_value,
         errors=errors
     )
+
+@router.get("/scheduler/status", response_model=SchedulerStatusResponse)
+async def get_scheduler_info():
+    """
+    Obtiene información del scheduler y próxima ejecución del job
+    """
+    try:
+        status = get_scheduler_status()
+        return status
+    except Exception as e:
+        logger.error(f"Error getting scheduler status: {e}")
+        raise HTTPException(status_code=500, detail=f"Error retrieving scheduler status: {str(e)}")
+
+@router.post("/scheduler/run-now")
+async def trigger_update_now():
+    """
+    Ejecuta manualmente el job de actualización (para testing)
+    """
+    try:
+        logger.info("Manual trigger of financial data update requested")
+        update_financial_data()
+        return {
+            "status": "success",
+            "message": "Financial data update completed successfully"
+        }
+    except Exception as e:
+        logger.error(f"Error executing manual update: {e}")
+        raise HTTPException(status_code=500, detail=f"Error executing update: {str(e)}")
