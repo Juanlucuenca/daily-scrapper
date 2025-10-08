@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.models.schemas import FinancialDataResponse, FinancialRecord, HealthCheckResponse, SchedulerStatusResponse
-from app.utils.csv_handler import CSVHandler
+from app.utils.db_handler import DBHandler
 from app.services.scraper import FinancialScraper
 from app.services.scheduler import get_scheduler_status, update_financial_data
 from typing import List
@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-csv_handler = CSVHandler()
+db_handler = DBHandler()
 
 @router.get("/uva", response_model=List[FinancialRecord])
 async def get_uva_data():
@@ -17,7 +17,7 @@ async def get_uva_data():
     Obtiene los datos históricos de UVA más 10 años de proyecciones mockeadas
     """
     try:
-        data = csv_handler.get_data_with_projections('uva', years=10)
+        data = db_handler.get_data_with_projections('uva', years=10)
 
         records = [
             FinancialRecord(fecha=row['fecha'], valor=float(row['valor']))
@@ -35,7 +35,7 @@ async def get_dolar_mayorista_data():
     Obtiene los datos históricos de Dólar Mayorista más 10 años de proyecciones mockeadas
     """
     try:
-        data = csv_handler.get_data_with_projections('dolar_mayorista', years=10)
+        data = db_handler.get_data_with_projections('dolar_mayorista', years=10)
 
         records = [
             FinancialRecord(fecha=row['fecha'], valor=float(row['valor']))
@@ -53,7 +53,7 @@ async def get_dolar_mep_data():
     Obtiene los datos históricos de Dólar MEP más 10 años de proyecciones mockeadas
     """
     try:
-        data = csv_handler.get_data_with_projections('dolar_mep', years=10)
+        data = db_handler.get_data_with_projections('dolar_mep', years=10)
 
         records = [
             FinancialRecord(fecha=row['fecha'], valor=float(row['valor']))

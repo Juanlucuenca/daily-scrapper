@@ -1,7 +1,7 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from app.services.scraper import FinancialScraper
-from app.utils.csv_handler import CSVHandler
+from app.utils.db_handler import DBHandler
 import logging
 import pytz
 from datetime import datetime
@@ -9,18 +9,18 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 scheduler = BackgroundScheduler()
-csv_handler = CSVHandler()
+db_handler = DBHandler()
 
 def update_financial_data():
     """
-    Tarea programada que actualiza los tres valores financieros en los CSVs
+    Tarea programada que actualiza los tres valores financieros en la base de datos
     """
     logger.info("Starting scheduled financial data update...")
 
     try:
         # Scrape UVA
         uva_data = FinancialScraper.scrape_uva()
-        csv_handler.update_csv_value('uva', uva_data['valor'])
+        db_handler.update_value('uva', uva_data['valor'])
         logger.info(f"UVA updated: {uva_data['valor']}")
 
     except Exception as e:
@@ -29,7 +29,7 @@ def update_financial_data():
     try:
         # Scrape Dólar Mayorista
         dolar_mayorista_data = FinancialScraper.scrape_dolar_mayorista()
-        csv_handler.update_csv_value('dolar_mayorista', dolar_mayorista_data['valor'])
+        db_handler.update_value('dolar_mayorista', dolar_mayorista_data['valor'])
         logger.info(f"Dólar Mayorista updated: {dolar_mayorista_data['valor']}")
 
     except Exception as e:
@@ -38,7 +38,7 @@ def update_financial_data():
     try:
         # Scrape Dólar MEP
         dolar_mep_data = FinancialScraper.scrape_dolar_mep()
-        csv_handler.update_csv_value('dolar_mep', dolar_mep_data['valor'])
+        db_handler.update_value('dolar_mep', dolar_mep_data['valor'])
         logger.info(f"Dólar MEP updated: {dolar_mep_data['valor']}")
 
     except Exception as e:

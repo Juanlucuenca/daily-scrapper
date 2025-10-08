@@ -6,3 +6,5 @@ lxml
 apscheduler
 pytz
 pydantic
+sqlalchemy
+psycopg2-binary
