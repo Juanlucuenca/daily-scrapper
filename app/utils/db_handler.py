@@ -18,12 +18,12 @@ class DBHandler:
         return SessionLocal()
 
     def read_data(self, financial_type: str) -> List[Dict[str, str]]:
-        """Lee datos de la base de datos"""
+        """Lee datos de la base de datos ordenados por ID (más viejo a más nuevo)"""
         db = self.get_session()
         try:
             records = db.query(FinancialData).filter(
                 FinancialData.tipo == financial_type
-            ).order_by(FinancialData.fecha).all()
+            ).order_by(FinancialData.id.asc()).all()
 
             data = [
                 {'fecha': record.fecha, 'valor': str(float(record.valor))}
