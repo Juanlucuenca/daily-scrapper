@@ -142,13 +142,24 @@ async def get_scheduler_info():
 async def trigger_update_now():
     """
     Ejecuta manualmente el job de actualización (para testing)
+
+    Retorna información detallada sobre:
+    - Fecha y hora de ejecución (horario Argentina)
+    - Valores actualizados para cada indicador
+    - Errores si ocurrieron
     """
     try:
         logger.info("Manual trigger of financial data update requested")
-        update_financial_data()
+        results = update_financial_data()
+
+        # Determinar status general
+        has_errors = len(results["errors"]) > 0
+        status = "partial_success" if has_errors else "success"
+
         return {
-            "status": "success",
-            "message": "Financial data update completed successfully"
+            "status": status,
+            "message": "Financial data update completed",
+            **results
         }
     except Exception as e:
         logger.error(f"Error executing manual update: {e}")

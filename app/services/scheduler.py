@@ -14,37 +14,85 @@ db_handler = DBHandler()
 def update_financial_data():
     """
     Tarea programada que actualiza los tres valores financieros en la base de datos
+    Returns: Dict con información de la actualización
     """
     logger.info("Starting scheduled financial data update...")
 
+    # Obtener fecha y hora de Argentina
+    argentina_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+    now_argentina = datetime.now(argentina_tz)
+    execution_date = now_argentina.strftime("%d-%m-%y")
+    execution_time = now_argentina.strftime("%H:%M:%S")
+    execution_datetime = now_argentina.strftime("%d-%m-%Y %H:%M:%S")
+
+    results = {
+        "execution_date": execution_date,
+        "execution_time": execution_time,
+        "execution_datetime": execution_datetime,
+        "timezone": "America/Argentina/Buenos_Aires",
+        "updates": {},
+        "errors": []
+    }
+
+    # Scrape UVA
     try:
-        # Scrape UVA
         uva_data = FinancialScraper.scrape_uva()
         db_handler.update_value('uva', uva_data['valor'])
+        results["updates"]["uva"] = {
+            "valor": float(uva_data['valor']),
+            "status": "success"
+        }
         logger.info(f"UVA updated: {uva_data['valor']}")
-
     except Exception as e:
-        logger.error(f"Failed to update UVA: {e}")
+        error_msg = f"Failed to update UVA: {str(e)}"
+        results["errors"].append(error_msg)
+        results["updates"]["uva"] = {
+            "valor": None,
+            "status": "error",
+            "error": str(e)
+        }
+        logger.error(error_msg)
 
+    # Scrape Dólar Mayorista
     try:
-        # Scrape Dólar Mayorista
         dolar_mayorista_data = FinancialScraper.scrape_dolar_mayorista()
         db_handler.update_value('dolar_mayorista', dolar_mayorista_data['valor'])
+        results["updates"]["dolar_mayorista"] = {
+            "valor": float(dolar_mayorista_data['valor']),
+            "status": "success"
+        }
         logger.info(f"Dólar Mayorista updated: {dolar_mayorista_data['valor']}")
-
     except Exception as e:
-        logger.error(f"Failed to update Dólar Mayorista: {e}")
+        error_msg = f"Failed to update Dólar Mayorista: {str(e)}"
+        results["errors"].append(error_msg)
+        results["updates"]["dolar_mayorista"] = {
+            "valor": None,
+            "status": "error",
+            "error": str(e)
+        }
+        logger.error(error_msg)
 
+    # Scrape Dólar MEP
     try:
-        # Scrape Dólar MEP
         dolar_mep_data = FinancialScraper.scrape_dolar_mep()
         db_handler.update_value('dolar_mep', dolar_mep_data['valor'])
+        results["updates"]["dolar_mep"] = {
+            "valor": float(dolar_mep_data['valor']),
+            "status": "success"
+        }
         logger.info(f"Dólar MEP updated: {dolar_mep_data['valor']}")
-
     except Exception as e:
-        logger.error(f"Failed to update Dólar MEP: {e}")
+        error_msg = f"Failed to update Dólar MEP: {str(e)}"
+        results["errors"].append(error_msg)
+        results["updates"]["dolar_mep"] = {
+            "valor": None,
+            "status": "error",
+            "error": str(e)
+        }
+        logger.error(error_msg)
 
     logger.info("Scheduled financial data update completed")
+    return results
 
 def start_scheduler():
     """
