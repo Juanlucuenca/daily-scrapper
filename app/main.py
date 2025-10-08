@@ -33,10 +33,4 @@ async def startup_event():
 async def root():
     return {
         "message": "Financial Data Scraper API",
-        "endpoints": {
-            "uva": "/api/uva",
-            "dolar_mayorista": "/api/dolar-mayorista",
-            "dolar_mep": "/api/dolar-mep",
-            "health": "/api/health"
-        }
     }

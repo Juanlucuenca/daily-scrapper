@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Obtener DATABASE_URL de variables de entorno
-DATABASE_URL = os.getenv("SUPABASE_DB_URL")
+DATABASE_URL = "postgresql://postgres.ttthismuwlkdrcbbevzw:sl1128319!@aws-1-us-east-2.pooler.supabase.com:6543/postgres"
 
 # Si no hay DATABASE_URL, usar SQLite local (para desarrollo)
 if not DATABASE_URL:
