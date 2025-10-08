@@ -4,6 +4,7 @@ from app.db.database import FinancialData, SessionLocal
 from typing import List, Dict
 from datetime import datetime, timedelta
 import logging
+import pytz
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +43,10 @@ class DBHandler:
     def update_value(self, financial_type: str, new_value: float, date_str: str = None) -> bool:
         """Actualiza o inserta un valor en la base de datos"""
         if date_str is None:
-            date_str = datetime.now().strftime("%d-%m-%y")
+            # Usar zona horaria de Argentina
+            argentina_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+            now_argentina = datetime.now(argentina_tz)
+            date_str = now_argentina.strftime("%d-%m-%y")
 
         db = self.get_session()
         try:

@@ -7,6 +7,7 @@ from fastapi import HTTPException
 from bs4 import BeautifulSoup
 from typing import Dict
 import logging
+import pytz
 
 logger = logging.getLogger(__name__)
 
@@ -68,17 +69,23 @@ class FinancialScraper:
         try:
             logger.info("Scraping UVA value...")
             uva_history_price = requests.get(URL_UVA, timeout=10).json()
+
+            # Usar zona horaria de Argentina
+            argentina_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+            now_argentina = datetime.datetime.now(argentina_tz)
+            current_date = now_argentina.strftime("%d-%m-%Y")
+
             uva_of_the_current_day = next(
-                (item for item in uva_history_price if item["fecha"] == datetime.datetime.now().strftime("%d-%m-%Y")),
+                (item for item in uva_history_price if item["fecha"] == current_date),
                 None
             )
 
             if uva_of_the_current_day:
                 valor = float(uva_of_the_current_day.get('valor', 0))
-                logger.info(f"UVA value scraped successfully: {valor}")
+                logger.info(f"UVA value scraped successfully for {current_date}: {valor}")
                 return {'valor': valor}
             else:
-                logger.warning("UVA value for current day not found")
+                logger.warning(f"UVA value for current day ({current_date}) not found")
                 return {'valor': 0.0}
 
         except Exception as e:
